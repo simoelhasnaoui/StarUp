@@ -1,7 +1,7 @@
 /**
  * Full-bleed hero scenes (Figma “slider” style): gradient, mega type, hero shot, floating accents.
  * @typedef {{ src: string, top?: string, left?: string, right?: string, bottom?: string, size: number, delay?: number }} Floater
- * @typedef {{ id: string, title: string, line: string, image: string, gradient: string, floaters: Floater[] }} HeroSlide
+ * @typedef {{ id: string, title: string, bgName: string, line: string, image: string, gradient: string, floaters: Floater[] }} HeroSlide
  */
 
 /** @type {HeroSlide[]} */
@@ -9,6 +9,7 @@ export const heroSlides = [
   {
     id: 'latte',
     title: 'LATTE',
+    bgName: 'LATTE',
     line: 'Onctueux & équilibré',
     image: 'Latte Macchiato.jpg',
     gradient:
@@ -22,6 +23,7 @@ export const heroSlides = [
   {
     id: 'crepe',
     title: 'CRÊPE',
+    bgName: 'CRÊPE',
     line: 'Nutella & banane',
     image: 'Crêpe Nutella Banane.jpg',
     gradient:
@@ -35,6 +37,7 @@ export const heroSlides = [
   {
     id: 'pistachio',
     title: 'PISTACHIO',
+    bgName: 'PISTACHIO',
     line: 'Pancake signature',
     image: 'Pancake Pistachio.jpg',
     gradient:
@@ -48,6 +51,7 @@ export const heroSlides = [
   {
     id: 'mangue',
     title: 'MANGUE',
+    bgName: 'MANGUE',
     line: 'FreshUp vitaminé',
     image: 'FreshUp mangue.jpg',
     gradient:
@@ -61,6 +65,7 @@ export const heroSlides = [
   {
     id: 'fraise',
     title: 'FRAISE',
+    bgName: 'FRAISE',
     line: 'Bubble tea fruité',
     image: 'Bubble Tea Fraise.png',
     gradient:
@@ -74,6 +79,7 @@ export const heroSlides = [
   {
     id: 'gaufre',
     title: 'GAUFRE',
+    bgName: 'GAUFRE',
     line: 'Gourmand & croustillant',
     image: 'Gaufre Nutella.jpg',
     gradient:
