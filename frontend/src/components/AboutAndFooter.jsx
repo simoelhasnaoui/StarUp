@@ -1,5 +1,5 @@
 import { publicImage } from '../utils/imageUrl';
-import { LOGO_NO_BG } from '../data/menu';
+import { LOGO_GREEN } from '../data/menu';
 
 export function AboutAndFooter() {
   return (
@@ -19,7 +19,7 @@ export function AboutAndFooter() {
             </p>
           </div>
           <div className="about__logo">
-            <img src={publicImage(LOGO_NO_BG)} alt="Starup Coffee" loading="lazy" decoding="async" />
+            <img src={publicImage(LOGO_GREEN)} alt="Starup Coffee" loading="lazy" decoding="async" />
           </div>
         </div>
       </section>

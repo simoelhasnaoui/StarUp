@@ -12,9 +12,16 @@ const links = [
 export function GlassNavbar() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    let lastY = window.scrollY;
+    const onScroll = () => {
+      const currentY = window.scrollY;
+      setScrolled(currentY > 24);
+      setHidden(currentY > lastY && currentY > 120);
+      lastY = Math.max(currentY, 0);
+    };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -32,7 +39,11 @@ export function GlassNavbar() {
   }, [open]);
 
   return (
-    <header className={`nav-outer ${scrolled ? 'nav-outer--scrolled' : ''}`}>
+    <header
+      className={`nav-outer ${scrolled ? 'nav-outer--scrolled' : ''} ${
+        hidden && !open ? 'nav-outer--hidden' : ''
+      }`}
+    >
       <div className="nav-center-wrap">
         <nav className="glass-nav" aria-label="Principale">
           <div className="glass-nav__links glass-nav__links--left">
