@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import {
+  AnimatePresence,
+  motion,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+  useMotionValue,
+  useSpring,
+} from 'framer-motion';
 import { publicImage } from '../utils/imageUrl';
 
 const AUTO_MS = 7500;
@@ -10,18 +18,12 @@ const DESC_ENTER_DELAY = NAME_ENTER_DELAY;
 const DESC_FADE_DURATION = 0.34;
 const DESC_EXIT_DURATION = NAME_EXIT_DURATION;
 const X_TRAVEL = '82vw';
-/** Roll from off-screen to center: |Δrotate| ≤ 180° to rest. */
 const SPIN = 180;
-/** Rotation wind-up (deg): nudge opposite the main roll, then to 0. */
 const ROT_WIND = 14;
-/** Exit: small counter-rotation (deg) before rolling off. */
 const EXIT_KICK = 12;
-/** Exit rotation end magnitude (|value| ≤ 180). */
 const EXIT_SPIN = 168;
 
-/** Normalized time: wind-up ends (same as first keyframe). */
 const WIND_UP_T = 0.15;
-/** When overshoot peak is hit; last segment eases back to center (“wind-down”). */
 const WIND_DOWN_PEAK_T = 0.86;
 
 const X_OVERSHOOT_VW = '2.75vw';
@@ -36,7 +38,6 @@ function rotPastCenter(dir) {
 }
 
 const easeMain = [0.33, 1, 0.25, 1];
-/** Return from past-center to rest (opposite of anticipation). */
 const easeWindDown = [0.34, 1, 0.66, 1];
 const enterEase = [easeMain, easeWindDown];
 const exitEase = [easeWindDown, easeMain];
@@ -157,7 +158,6 @@ function imageVariants(reduceMotion) {
   };
 }
 
-/** Same horizontal slide + wind-up as the product image (no blur — pure slide). */
 function nameSlideVariants(reduceMotion) {
   if (reduceMotion) {
     return {
@@ -240,14 +240,97 @@ function descVariants(reduceMotion) {
   };
 }
 
+/** 
+ * Wraps a button to provide a "Magnetic" pull effect using Framer Motion. 
+ */
+function MagneticButton({ children, className, onClick, ariaLabel, strength = 0.4 }) {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const springX = useSpring(x, { damping: 15, stiffness: 120 });
+  const springY = useSpring(y, { damping: 15, stiffness: 120 });
+
+  function handleMouseMove(e) {
+    const { clientX, clientY, currentTarget } = e;
+    const { left, top, width, height } = currentTarget.getBoundingClientRect();
+    const centerX = left + width / 2;
+    const centerY = top + height / 2;
+    x.set((clientX - centerX) * strength);
+    y.set((clientY - centerY) * strength);
+  }
+
+  function reset() {
+    x.set(0);
+    y.set(0);
+  }
+
+  return (
+    <motion.div
+      style={{ x: springX, y: springY }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={reset}
+      className={className}
+    >
+      <button 
+        type="button" 
+        onClick={onClick} 
+        aria-label={ariaLabel}
+        style={{ width: '100%', height: '100%', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+      >
+        {children}
+      </button>
+    </motion.div>
+  );
+}
+
+/**
+ * Individual Floater component to safely use hooks for parallax.
+ */
+function FloaterItem({ f, i, direction, scrollY, variants }) {
+  const depth = i % 2 === 0 ? -0.15 : -0.35;
+  const yParallax = useTransform(scrollY, [0, 1000], [0, 1000 * depth]);
+
+  return (
+    <motion.img
+      className="hero-showcase__floater"
+      src={publicImage(f.src)}
+      alt=""
+      decoding="async"
+      custom={{ f, direction }}
+      variants={variants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      style={{
+        width: `${f.size}px`,
+        height: `${f.size}px`,
+        top: f.top,
+        left: f.left,
+        right: f.right,
+        bottom: f.bottom,
+        y: yParallax
+      }}
+    />
+  );
+}
+
 export function HeroShowcase({ slides, children }) {
   const reduceMotion = useReducedMotion();
+  const { scrollY } = useScroll();
+  
+  // Cinematic Retreat Parallax
+  const heroScale = useTransform(scrollY, [0, 800], [1, 0.82]);
+  const heroOpacity = useTransform(scrollY, [0, 800], [1, 0]);
+  const heroBlur = useTransform(scrollY, [100, 600], ["blur(0px)", "blur(15px)"]);
+  const heroY = useTransform(scrollY, [0, 800], [0, -120]);
+  
+  const rotateScroll = useTransform(scrollY, [0, 800], [0, 120]);
+
+
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(1);
-  const [paused, setPaused] = useState(false);
+
   const transitionLockRef = useRef(false);
   const lockTimerRef = useRef(null);
-  const floatLayerRef = useRef(null);
 
   const n = slides.length;
   const slide = n ? slides[((index % n) + n) % n] : null;
@@ -282,16 +365,7 @@ export function HeroShowcase({ slides, children }) {
     [],
   );
 
-  useEffect(() => {
-    if (reduceMotion || paused || !n) return undefined;
-    const id = window.setInterval(() => {
-      if (transitionLockRef.current) return;
-      lockTransition();
-      setDirection(1);
-      setIndex((i) => (i + 1 + n) % n);
-    }, AUTO_MS);
-    return () => window.clearInterval(id);
-  }, [lockTransition, reduceMotion, paused, n]);
+
 
   useEffect(() => {
     function handleKeyDown(e) {
@@ -305,32 +379,6 @@ export function HeroShowcase({ slides, children }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [go]);
 
-  useEffect(() => {
-    const el = floatLayerRef.current;
-    if (!el || reduceMotion) return undefined;
-
-    let raf = 0;
-    const updateParallax = () => {
-      raf = 0;
-      const coverDistance = window.innerHeight || 1;
-      const scrollProgress = Math.min(window.scrollY, coverDistance);
-      el.style.transform = `translate3d(0, ${scrollProgress * -0.22}px, 0)`;
-    };
-    const onScroll = () => {
-      if (!raf) raf = window.requestAnimationFrame(updateParallax);
-    };
-
-    updateParallax();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    return () => {
-      if (raf) window.cancelAnimationFrame(raf);
-      window.removeEventListener('scroll', onScroll);
-      window.removeEventListener('resize', onScroll);
-      el.style.transform = '';
-    };
-  }, [reduceMotion]);
-
   const imgV = imageVariants(Boolean(reduceMotion));
   const nmV = nameSlideVariants(Boolean(reduceMotion));
   const dV = descVariants(Boolean(reduceMotion));
@@ -339,14 +387,17 @@ export function HeroShowcase({ slides, children }) {
   if (!slide) return null;
 
   return (
-    <div
+    <motion.div
       className="hero-showcase hero-showcase--fullscreen"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
+      animate={{ backgroundColor: slide.baseColor }}
+      transition={{ duration: 1.2, ease: [0.4, 0, 0.2, 1] }}
     >
       {children}
 
-      <div className="hero-showcase__viewport">
+      <motion.div 
+        className="hero-showcase__viewport"
+        style={{ scale: heroScale, opacity: heroOpacity, filter: heroBlur, y: heroY }}
+      >
         <AnimatePresence initial={false} mode="sync">
           <motion.div
             key={`bg-${slide.id}`}
@@ -362,28 +413,16 @@ export function HeroShowcase({ slides, children }) {
           />
         </AnimatePresence>
 
-        <div ref={floatLayerRef} className="hero-showcase__float-layer">
+        <div className="hero-showcase__float-layer">
           <AnimatePresence initial={false} custom={direction} mode="sync">
-            {(slide.floaters || [])?.map((f) => (
-              <motion.img
+            {(slide.floaters || [])?.map((f, i) => (
+              <FloaterItem 
                 key={`${slide.id}-floater-${f.src}`}
-                className="hero-showcase__floater"
-                src={publicImage(f.src)}
-                alt=""
-                decoding="async"
-                custom={{ f, direction }}
+                f={f}
+                i={i}
+                direction={direction}
+                scrollY={scrollY}
                 variants={fV}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                style={{
-                  width: `${f.size}px`,
-                  height: `${f.size}px`,
-                  top: f.top,
-                  left: f.left,
-                  right: f.right,
-                  bottom: f.bottom,
-                }}
               />
             ))}
           </AnimatePresence>
@@ -400,7 +439,7 @@ export function HeroShowcase({ slides, children }) {
                 exit="exit"
                 aria-hidden
                 style={{
-                  fontSize: slide.bgSize || `clamp(3rem, min(32vw, ${110 / Math.max(1, slide.bgName.length)}vw), 19rem)`,
+                  fontSize: slide.bgSize || `clamp(3rem, min(32vw, ${110 / Math.max(1, slide.bgName.length)}vw), 19rem)`
                 }}
               >
                 {slide.bgName}
@@ -415,7 +454,9 @@ export function HeroShowcase({ slides, children }) {
                 animate="animate"
                 exit="exit"
               >
-                <img src={publicImage(slide.image)} alt="" decoding="async" />
+                <motion.div style={{ rotate: rotateScroll, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <img src={publicImage(slide.image)} alt="" decoding="async" />
+                </motion.div>
               </motion.div>
             </AnimatePresence>
           </div>
@@ -436,43 +477,34 @@ export function HeroShowcase({ slides, children }) {
           </AnimatePresence>
 
           <div className="hero-showcase__nav-pair" role="group" aria-label="Navigation du produit">
-            <button
-              type="button"
-              className="hero-showcase__circle-nav"
-              aria-label="Produit précédent"
+            <MagneticButton
+              className="hero-showcase__magnetic-wrap"
+              ariaLabel="Produit précédent"
               onClick={() => go(-1)}
             >
-              <svg className="hero-showcase__circle-nav-chevron" viewBox="0 0 24 24" aria-hidden>
-                <path
-                  d="M14 6l-6 6 6 6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-            <button
-              type="button"
-              className="hero-showcase__circle-nav"
-              aria-label="Produit suivant"
+              <div className="hero-showcase__circle-nav">
+                <svg className="hero-showcase__circle-nav-chevron" viewBox="0 0 24 24" aria-hidden>
+                  <path d="M14 6l-6 6 6 6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            </MagneticButton>
+
+
+
+            <MagneticButton
+              className="hero-showcase__magnetic-wrap"
+              ariaLabel="Produit suivant"
               onClick={() => go(1)}
             >
-              <svg className="hero-showcase__circle-nav-chevron" viewBox="0 0 24 24" aria-hidden>
-                <path
-                  d="M10 6l6 6-6 6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
+              <div className="hero-showcase__circle-nav">
+                <svg className="hero-showcase__circle-nav-chevron" viewBox="0 0 24 24" aria-hidden>
+                  <path d="M10 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+            </MagneticButton>
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
