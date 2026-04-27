@@ -100,7 +100,11 @@ function MenuCard({ item, onOpen, index }) {
           <span className="menu-card__category">{item.categoryTitle}</span>
           <h4 className="menu-card__name">{item.name}</h4>
           <div className="menu-card__foot">
-            <span className="menu-card__cta">Découvrir</span>
+            <div className="menu-card__cta" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M7 17L17 7M17 7H7M17 7V17" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
             <strong className="menu-card__price">{item.price} DH</strong>
           </div>
         </div>
