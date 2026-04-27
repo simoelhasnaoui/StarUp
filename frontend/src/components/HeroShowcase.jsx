@@ -41,6 +41,73 @@ const easeWindDown = [0.34, 1, 0.66, 1];
 const enterEase = [easeMain, easeWindDown];
 const exitEase = [easeWindDown, easeMain];
 
+const Y_TRAVEL = '130vh';
+const Y_OVERSHOOT_VH = '2.75vh';
+
+function yPastCenter(dir) {
+  return dir === 1 ? `-${Y_OVERSHOOT_VH}` : Y_OVERSHOOT_VH;
+}
+
+function floaterVariants(reduceMotion) {
+  if (reduceMotion) {
+    return {
+      initial: { opacity: 0, y: 0, scale: 1, rotate: 0 },
+      animate: { opacity: 1, y: 0, scale: 1, rotate: 0, transition: { duration: 0.2 } },
+      exit: { opacity: 0, transition: { duration: 0.15 } },
+    };
+  }
+  return {
+    initial: ({ f, direction = 1 }) => {
+      const fDir = (f?.enterFrom === 'bottom' || f?.bottom) ? 1 : -1;
+      const dir = fDir * direction;
+      return {
+        y: dir === 1 ? Y_TRAVEL : `-${Y_TRAVEL}`,
+        rotate: dir === 1 ? SPIN : -SPIN,
+        opacity: 1,
+      };
+    },
+    animate: ({ f, direction = 1 }) => {
+      const fDir = (f?.enterFrom === 'bottom' || f?.bottom) ? 1 : -1;
+      const dir = fDir * direction;
+      return {
+        y:
+          dir === 1
+            ? ['140vh', yPastCenter(dir), 0]
+            : ['-140vh', yPastCenter(dir), 0],
+        rotate: [
+          dir === 1 ? SPIN - ROT_WIND : -SPIN + ROT_WIND,
+          rotPastCenter(dir),
+          0,
+        ],
+        opacity: 1,
+        transition: {
+          delay: NAME_ENTER_DELAY + (f?.delay ?? 0),
+          duration: DURATION,
+          times: [WIND_UP_T, WIND_DOWN_PEAK_T, 1],
+          ease: enterEase,
+        },
+      };
+    },
+    exit: ({ f, direction = 1 }) => {
+      const fDir = (f?.enterFrom === 'bottom' || f?.bottom) ? 1 : -1;
+      const dir = fDir * direction;
+      return {
+        y: dir === 1 ? [0, '5vh', '-130vh'] : [0, '-5vh', '130vh'],
+        rotate:
+          dir === 1
+            ? [0, EXIT_KICK, -EXIT_SPIN]
+            : [0, -EXIT_KICK, EXIT_SPIN],
+        opacity: 1,
+        transition: {
+          duration: DURATION,
+          times: [0, 0.15, 1],
+          ease: exitEase,
+        },
+      };
+    },
+  };
+}
+
 function imageVariants(reduceMotion) {
   if (reduceMotion) {
     return {
@@ -227,6 +294,18 @@ export function HeroShowcase({ slides, children }) {
   }, [lockTransition, reduceMotion, paused, n]);
 
   useEffect(() => {
+    function handleKeyDown(e) {
+      if (e.key === 'ArrowLeft') {
+        go(-1);
+      } else if (e.key === 'ArrowRight') {
+        go(1);
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [go]);
+
+  useEffect(() => {
     const el = floatLayerRef.current;
     if (!el || reduceMotion) return undefined;
 
@@ -255,6 +334,7 @@ export function HeroShowcase({ slides, children }) {
   const imgV = imageVariants(Boolean(reduceMotion));
   const nmV = nameSlideVariants(Boolean(reduceMotion));
   const dV = descVariants(Boolean(reduceMotion));
+  const fV = floaterVariants(Boolean(reduceMotion));
 
   if (!slide) return null;
 
@@ -283,6 +363,31 @@ export function HeroShowcase({ slides, children }) {
         </AnimatePresence>
 
         <div ref={floatLayerRef} className="hero-showcase__float-layer">
+          <AnimatePresence initial={false} custom={direction} mode="sync">
+            {(slide.floaters || [])?.map((f) => (
+              <motion.img
+                key={`${slide.id}-floater-${f.src}`}
+                className="hero-showcase__floater"
+                src={publicImage(f.src)}
+                alt=""
+                decoding="async"
+                custom={{ f, direction }}
+                variants={fV}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                style={{
+                  width: `${f.size}px`,
+                  height: `${f.size}px`,
+                  top: f.top,
+                  left: f.left,
+                  right: f.right,
+                  bottom: f.bottom,
+                }}
+              />
+            ))}
+          </AnimatePresence>
+
           <div className="hero-showcase__stage">
             <AnimatePresence initial={false} custom={direction} mode="sync">
               <motion.p
@@ -294,6 +399,9 @@ export function HeroShowcase({ slides, children }) {
                 animate="animate"
                 exit="exit"
                 aria-hidden
+                style={{
+                  fontSize: slide.bgSize || `clamp(3rem, min(32vw, ${110 / Math.max(1, slide.bgName.length)}vw), 19rem)`,
+                }}
               >
                 {slide.bgName}
               </motion.p>
@@ -328,40 +436,40 @@ export function HeroShowcase({ slides, children }) {
           </AnimatePresence>
 
           <div className="hero-showcase__nav-pair" role="group" aria-label="Navigation du produit">
-          <button
-            type="button"
-            className="hero-showcase__circle-nav"
-            aria-label="Produit précédent"
-            onClick={() => go(-1)}
-          >
-            <svg className="hero-showcase__circle-nav-chevron" viewBox="0 0 24 24" aria-hidden>
-              <path
-                d="M14 6l-6 6 6 6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="hero-showcase__circle-nav"
-            aria-label="Produit suivant"
-            onClick={() => go(1)}
-          >
-            <svg className="hero-showcase__circle-nav-chevron" viewBox="0 0 24 24" aria-hidden>
-              <path
-                d="M10 6l6 6-6 6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
+            <button
+              type="button"
+              className="hero-showcase__circle-nav"
+              aria-label="Produit précédent"
+              onClick={() => go(-1)}
+            >
+              <svg className="hero-showcase__circle-nav-chevron" viewBox="0 0 24 24" aria-hidden>
+                <path
+                  d="M14 6l-6 6 6 6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className="hero-showcase__circle-nav"
+              aria-label="Produit suivant"
+              onClick={() => go(1)}
+            >
+              <svg className="hero-showcase__circle-nav-chevron" viewBox="0 0 24 24" aria-hidden>
+                <path
+                  d="M10 6l6 6-6 6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
           </div>
         </div>
       </div>

@@ -365,6 +365,15 @@ main {
   will-change: transform;
 }
 
+.hero-showcase__floater {
+  position: absolute;
+  z-index: 2;
+  pointer-events: none;
+  user-select: none;
+  object-fit: contain;
+  will-change: transform, opacity;
+}
+
 .hero-showcase__stage {
   position: absolute;
   inset: 0;
@@ -410,14 +419,16 @@ main {
   margin-top: calc(min(560px, 94vw) / -2);
   border-radius: 50%;
   overflow: hidden;
-  background: #f7f1e8;
-  border: 3px solid rgba(255, 255, 255, 0.42);
-  box-shadow: 0 32px 70px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+  background: transparent;
+  border: 0;
+  box-shadow: 0 32px 70px rgba(0, 0, 0, 0.55);
   transform-origin: 50% 50%;
   will-change: transform, opacity;
   pointer-events: none;
   isolation: isolate;
 }
+
+/* Reverted: breakfast slide uses default circular backdrop again */
 
 .hero-showcase__product-roll img {
   position: relative;
@@ -433,7 +444,7 @@ main {
   left: clamp(1.25rem, 5vw, 4.25rem);
   bottom: clamp(6.5rem, 12vh, 9rem);
   z-index: 20;
-  max-width: min(27rem, calc(100vw - 3rem));
+  max-width: min(24rem, calc(100vw - 3rem));
   margin: 0;
   padding: 0;
   color: #fff;
@@ -442,21 +453,21 @@ main {
 }
 
 .hero-showcase__desc-title {
-  margin: 0 0 0.7rem;
-  font-size: clamp(1.55rem, 3.4vw, 3.1rem);
+  margin: 0 0 0.45rem;
+  font-size: clamp(1.35rem, 2.6vw, 2.1rem);
   font-weight: 800;
-  line-height: 0.95;
-  letter-spacing: 0;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
 }
 
 .hero-showcase__desc-copy {
-  max-width: 23rem;
+  max-width: 22rem;
   margin: 0;
-  font-size: clamp(0.72rem, 1vw, 0.9rem);
+  font-size: clamp(0.78rem, 1.05vw, 0.95rem);
   font-weight: 500;
-  line-height: 1.45;
-  letter-spacing: 0;
-  color: rgba(255, 255, 255, 0.72);
+  line-height: 1.6;
+  letter-spacing: 0.005em;
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .hero-showcase__nav-pair {
@@ -731,6 +742,7 @@ main {
   height: 100%;
   object-fit: cover;
   transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.25));
 }
 
 .menu-card:hover .menu-card__media img {
@@ -803,7 +815,7 @@ main {
   border-radius: 0.5rem;
   background: #fff;
   color: var(--color-ink);
-  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.35);
+  box-shadow: none;
 }
 
 .menu-modal__close {
@@ -815,12 +827,36 @@ main {
   height: 2.4rem;
   border: 1px solid rgba(14, 94, 78, 0.18);
   border-radius: 50%;
-  background: #fff;
-  color: var(--color-green);
-  font-size: 1.25rem;
-  font-weight: 800;
-  line-height: 1;
+  background: rgba(255, 255, 255, 0.92);
+  color: rgba(14, 94, 78, 0.82);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
   cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.2s ease, background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.menu-modal__close:hover {
+  border-color: var(--color-green);
+  background: var(--color-green);
+  color: #fff;
+}
+
+.menu-modal__close:active {
+  transform: scale(0.96);
+}
+
+.menu-modal__close:focus-visible {
+  outline: 2px solid rgba(14, 94, 78, 0.5);
+  outline-offset: 3px;
+}
+
+.menu-modal__close svg {
+  width: 46%;
+  height: 46%;
+  display: block;
 }
 
 .menu-modal__media {
@@ -918,7 +954,8 @@ main {
   margin: 0;
   position: relative;
   z-index: 2;
-  background: #f4f7f5;
+  background: var(--color-green);
+  color: #fff;
 }
 
 .glass-panel {
@@ -938,6 +975,9 @@ main {
   margin: 0 auto;
   overflow: hidden;
   position: relative;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 22px 60px rgba(0, 0, 0, 0.22);
 }
 
 .about__card::before {
@@ -945,18 +985,18 @@ main {
   position: absolute;
   inset: 0 auto 0 0;
   width: 0.45rem;
-  background: var(--color-green);
+  background: rgba(255, 255, 255, 0.75);
 }
 
 .about__text .section-title {
-  color: var(--color-green-dark);
+  color: #fff;
   text-align: left;
 }
 
 .about__text p {
   margin: 0 0 1rem;
   line-height: 1.65;
-  color: rgba(11, 18, 16, 0.78);
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .about__text p:last-child {
@@ -968,13 +1008,13 @@ main {
   justify-self: end;
   padding: 1.25rem;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(184, 224, 212, 0.42), rgba(255, 255, 255, 0));
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0));
 }
 
 .about__logo img {
   width: 100%;
   height: auto;
-  filter: drop-shadow(0 12px 24px rgba(14, 94, 78, 0.2));
+  filter: drop-shadow(0 18px 34px rgba(0, 0, 0, 0.35));
 }
 
 @media (max-width: 640px) {

@@ -195,7 +195,15 @@ export function MenuGrid() {
               aria-label="Fermer"
               onClick={() => setSelectedItem(null)}
             >
-              x
+              <svg viewBox="0 0 24 24" aria-hidden>
+                <path
+                  d="M7 7l10 10M17 7L7 17"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                />
+              </svg>
             </button>
             <div className="menu-modal__media">
               <img src={publicImage(selectedItem.image)} alt="" decoding="async" />

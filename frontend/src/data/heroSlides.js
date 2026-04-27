@@ -1,93 +1,72 @@
 /**
  * Full-bleed hero scenes (Figma “slider” style): gradient, mega type, hero shot, floating accents.
- * @typedef {{ src: string, top?: string, left?: string, right?: string, bottom?: string, size: number, delay?: number }} Floater
- * @typedef {{ id: string, title: string, bgName: string, line: string, image: string, gradient: string, floaters: Floater[] }} HeroSlide
+ * @typedef {{ src: string, top?: string, left?: string, right?: string, bottom?: string, size: number, delay?: number, enterFrom?: 'top' | 'bottom' }} Floater
+ * @typedef {{ id: string, title: string, bgName: string, bgSize?: string, line: string, image: string, gradient: string, floaters: Floater[] }} HeroSlide
  */
 
 /** @type {HeroSlide[]} */
 export const heroSlides = [
   {
-    id: 'latte',
-    title: 'LATTE',
-    bgName: 'LATTE',
-    line: 'Onctueux & équilibré',
-    image: 'Latte Macchiato.jpg',
+    id: 'breakfast',
+    title: 'Crêpe Gourmande Charcuterie & Œuf',
+    bgName: 'GOURMANDE',
+    bgSize: '15vw',
+    line: 'Un brunch signature généreux, combinant une charcuterie premium, un œuf parfaitement coulant et des touches de verdure fraîche pour éveiller vos papilles.',
+    image: 'breakfast.png',
     gradient:
-      'radial-gradient(ellipse 90% 75% at 50% 110%, #6b4c3a 0%, #3d2418 42%, #1a0f0c 100%)',
+      'radial-gradient(ellipse 88% 76% at 50% 105%, #b75b52 0%, #7a2b28 44%, #2a0f10 100%)',
     floaters: [
-      { src: 'Café Espresso.jpg', top: '10%', left: '6%', size: 76, delay: 0 },
-      { src: 'Chocolat Chaud.jpg', bottom: '14%', right: '8%', size: 68, delay: 0.2 },
-      { src: 'Café Crème.jpg', top: '22%', right: '12%', size: 56, delay: 0.4 },
+      { src: 'egg.png', top: '16%', left: '14%', size: 175, delay: 0, enterFrom: 'top' },
+      {
+        src: 'tomate cerise.png',
+        bottom: '16%',
+        right: '14%',
+        size: 175,
+        delay: 0.12,
+        enterFrom: 'bottom',
+      },
     ],
   },
   {
-    id: 'crepe',
-    title: 'CRÊPE',
-    bgName: 'CRÊPE',
-    line: 'Nutella & banane',
-    image: 'Crêpe Nutella Banane.jpg',
+    id: 'charcuterie',
+    title: 'CRÊPE CHARCUTERIE',
+    bgName: 'CHARCUTERIE',
+    bgSize: '13vw',
+    line: 'Une crêpe fondante garnie de fines tranches de charcuterie sélectionnée, offrant une expérience salée riche et authentique à chaque bouchée.',
+    image: 'Crêpe Charcuterie Hero.png',
     gradient:
-      'radial-gradient(ellipse 88% 72% at 50% 100%, #8b5a2b 0%, #4a2c14 45%, #1f1208 100%)',
+      'radial-gradient(ellipse 88% 76% at 50% 105%, #8b5a2b 0%, #4a2c14 45%, #1f1208 100%)',
     floaters: [
-      { src: 'Crêpe Nutella.jpg', top: '14%', left: '10%', size: 72, delay: 0 },
-      { src: 'Crêpe Biscoff.jpg', bottom: '12%', right: '10%', size: 70, delay: 0.15 },
-      { src: 'Gaufre miel.jpg', top: '20%', right: '6%', size: 58, delay: 0.35 },
+      { src: 'charcuterie.png', top: '8%', left: '12%', size: 220, delay: 0, enterFrom: 'top' },
+      { src: 'charcuterie1.png', bottom: '4%', right: '12%', size: 220, delay: 0.15, enterFrom: 'bottom' },
     ],
   },
   {
-    id: 'pistachio',
-    title: 'PISTACHIO',
-    bgName: 'PISTACHIO',
-    line: 'Pancake signature',
-    image: 'Pancake Pistachio.jpg',
+    id: 'poulet-champignon',
+    title: 'CRÊPE POULET CHAMPIGNON',
+    bgName: 'CHAMPIGNON',
+    bgSize: '14vw',
+    line: 'L\'alliance classique et réconfortante d\'un poulet tendre et de champignons dorés, le tout nappé d\'une sauce veloutée dans une crêpe dorée à souhait.',
+    image: 'Crêpe Poulet Champignon Hero.png',
     gradient:
-      'radial-gradient(ellipse 85% 70% at 50% 105%, #3d6b52 0%, #1e4a38 48%, #0e2419 100%)',
+      'radial-gradient(ellipse 88% 76% at 50% 105%, #b28a50 0%, #6e4e20 44%, #2e1d08 100%)',
     floaters: [
-      { src: 'Pancake Lotus.jpg', top: '12%', left: '8%', size: 68, delay: 0 },
-      { src: 'Pancake Oreo.jpg', bottom: '16%', right: '9%', size: 64, delay: 0.25 },
-      { src: 'Crêpe Pistachio.jpg', top: '24%', right: '11%', size: 60, delay: 0.4 },
+      { src: 'chickenbreast.png', top: '2%', left: '12%', size: 300, delay: 0, enterFrom: 'top' },
+      { src: 'mushroom.png', bottom: '4%', right: '12%', size: 300, delay: 0.15, enterFrom: 'bottom' },
     ],
   },
   {
-    id: 'mangue',
-    title: 'MANGUE',
-    bgName: 'MANGUE',
-    line: 'FreshUp vitaminé',
-    image: 'FreshUp mangue.jpg',
+    id: 'reve-fromage',
+    title: 'CRÊPE RÊVE DU FROMAGE',
+    bgName: 'FROMAGE',
+    bgSize: '18vw',
+    line: 'Une symphonie onctueuse de fromages fondus. Intense, gourmande et filante, cette merveille comblera toutes vos envies irrésistibles de fromage.',
+    image: 'Crêpe Rêve du Fromage.png',
     gradient:
-      'radial-gradient(ellipse 88% 75% at 50% 100%, #e8a038 0%, #b85c14 40%, #4a2608 100%)',
+      'radial-gradient(ellipse 88% 76% at 50% 105%, #d1a84f 0%, #876521 44%, #302005 100%)',
     floaters: [
-      { src: 'FreshUp Ananas.jpg', top: '11%', left: '7%', size: 70, delay: 0 },
-      { src: 'FreshUp fraise.jpg', bottom: '14%', right: '8%', size: 66, delay: 0.2 },
-      { src: 'FreshUp citron.jpg', top: '26%', right: '10%', size: 58, delay: 0.35 },
-    ],
-  },
-  {
-    id: 'fraise',
-    title: 'FRAISE',
-    bgName: 'FRAISE',
-    line: 'Bubble tea fruité',
-    image: 'Bubble Tea Fraise.png',
-    gradient:
-      'radial-gradient(ellipse 86% 72% at 50% 100%, #c94d6a 0%, #7a1e32 44%, #2a0a12 100%)',
-    floaters: [
-      { src: 'Strawberry Milked Bubble Tea.png', top: '13%', left: '9%', size: 64, delay: 0 },
-      { src: 'Bubble Tea Citron.png', bottom: '15%', right: '7%', size: 62, delay: 0.2 },
-      { src: 'FreshUp Framboise.jpg', top: '22%', right: '12%', size: 58, delay: 0.4 },
-    ],
-  },
-  {
-    id: 'gaufre',
-    title: 'GAUFRE',
-    bgName: 'GAUFRE',
-    line: 'Gourmand & croustillant',
-    image: 'Gaufre Nutella.jpg',
-    gradient:
-      'radial-gradient(ellipse 88% 74% at 50% 100%, #5c3d2e 0%, #2e1810 46%, #120a08 100%)',
-    floaters: [
-      { src: 'Gaufre Biscoff.jpg', top: '12%', left: '8%', size: 70, delay: 0 },
-      { src: 'Gaufre Nutella banana.jpg', bottom: '13%', right: '9%', size: 68, delay: 0.18 },
-      { src: 'Chocolat Fondu.png', top: '24%', right: '8%', size: 56, delay: 0.38 },
+      { src: 'cheese.png', top: '2%', left: '12%', size: 300, delay: 0, enterFrom: 'top' },
+      { src: 'cheese1.png', bottom: '4%', right: '12%', size: 300, delay: 0.15, enterFrom: 'bottom' },
     ],
   },
 ];
